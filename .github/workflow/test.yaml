@@ -10,6 +10,5 @@ jobs:
         env:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Your ML workflow goes here
           pip install -r requirements.txt
-          python test.py
+          python test_covid19_dashboards.py
