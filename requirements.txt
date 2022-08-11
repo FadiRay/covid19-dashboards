@@ -4,3 +4,4 @@ requests
 folium
 datetime
 streamlit_folium
+pytest
