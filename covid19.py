@@ -48,6 +48,7 @@ df_map = df                     # a copy for the map
 # start of the dashboarding
 
 st.set_page_config(layout='wide')
+st.write('hello')
 st.title('COVID19 DASHBOARDS')
 
 # a radio button widget for choosing the country
