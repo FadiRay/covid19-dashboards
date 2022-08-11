@@ -1,15 +1,27 @@
+import pandas as pd
+import streamlit as st
+import requests
+import folium
+from streamlit_folium import st_folium
+from datetime import datetime, date, timedelta
+import datetime as dt
+
 # importing the covid19 data
 
-url      = 'https://opendata.ecdc.europa.eu/covid19/nationalcasedeath_eueea_daily_ei/json'
-response = requests.get(url, 'covid19.json')
-df       = pd.DataFrame.from_records(pd.read_json('covid19.json').records.tolist())
+url        = 'https://opendata.ecdc.europa.eu/covid19/nationalcasedeath_eueea_daily_ei/json'
+response_1 = requests.get(url)
+covid19    = response_1.json()
+df         = pd.DataFrame(pd.DataFrame.from_records(covid19).records.tolist())
 
 #importing the geojson data
 
 geojson_url = 'https://raw.githubusercontent.com/leakyMirror/map-of-europe/master/GeoJSON/europe.geojson'
-response    = requests.get(geojson_url)
-geojson     = response.json()
+response_2  = requests.get(geojson_url)
+geojson     = response_2.json()
 
+# conn checks is the connection has been successful
+def conn():
+    return [response_1.status_code, response_2.status_code]
 
 # cleaning the covid19 data 
 
@@ -42,13 +54,17 @@ st.title('COVID19 DASHBOARDS')
 
 country = st.radio(
      'Choose a country:',
-      ('Austria', 'Belgium', 'Bulgaria', 'Croatia', 'Cyprus', 'Czechia',
-       'Denmark', 'Estonia', 'Finland', 'France', 'Germany', 'Greece',
-       'Hungary', 'Iceland', 'Ireland', 'Italy', 'Latvia',
+      ('Europe', 'Austria', 'Belgium', 'Bulgaria', 'Croatia', 'Cyprus',
+       'Czechia', 'Denmark', 'Estonia', 'Finland', 'France', 'Germany',
+       'Greece', 'Hungary', 'Iceland', 'Ireland', 'Italy', 'Latvia',
        'Liechtenstein', 'Lithuania', 'Luxembourg', 'Malta', 'Netherlands',
        'Norway', 'Poland', 'Portugal', 'Romania', 'Slovakia', 'Slovenia',
        'Spain', 'Sweden'), horizontal=True)  
-df = df[df['Country']==country]             # filtering the DataFrame by the country
+if country != 'Europe':
+    df = df[df['Country']==country]          # filtering the DataFrame by the country
+
+def SelectedCountry():                       # to assert the selected country
+    return country==('Europe' or df['Country'][0])
 
 # inserting two side-by-side dashboards
 
@@ -62,14 +78,37 @@ with col2:
 
 # inserting the map dashboard
 
-st.header('Covid19 map')
+df_map.rename(columns={'Cases': 'Cases per 100.000'}, inplace=True)
+
+st.header('Covid19 Map in Europe')
 col1, col2 = st.columns(2)
 with col2:                                   # col2 to select the date and cases/deaths parameter      
-    date      = st.date_input('Choose a date:', datetime.date(2020, 1, 1))
-    parameter = st.radio('',('Cases', 'Deaths'))
+    da = st.date_input('Choose a date:', date.today()+timedelta(days=-2))
+    
+    # checking if the data available for the selected date
+    if da > date.today()+timedelta(days=-2):
+        st.subheader('No data available yet, latest date:')
+        da = date.today()+timedelta(days=-2)
+        st.write(da)
+    if da < dt.date(2020, 1, 1):
+        st.subheader('No data available, earliest date:')
+        da = dt.date(2020, 1, 1)
+        st.write(da)
+    
+    parameter = st.radio('',('Cases per 100.000', 'Deaths'))
+    
+def SelectedParameter():                       # to assert the selected parameter
+    return parameter==('Cases per 100.000' or 'Deaths')
 
 df_map.index = df_map.index.astype('str')  
-df_map = df_map[df_map.index==str(date)]     # selecting the chosen date
+df_map = df_map[df_map.index==str(da)]       # selecting the chosen date
+
+if da > date.today()+timedelta(days=-2):
+    st.header('No data available yet')
+    da = date.today()+timedelta(days=-2)
+    
+def SelectedDate():                          # to assert the selected date 
+    return da==datetime.date(datetime.strptime(df_map.index[0], '%Y-%m-%d'))
 
 # configuring the map
 map_fig = folium.Map(location=[58,18], zoom_start=3)
@@ -85,3 +124,4 @@ folium.Choropleth(
 
 with col1:
     st_folium(map_fig, height=500, width=700)
+    
