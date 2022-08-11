@@ -1,6 +1,6 @@
 # covid19-dashboards
 
-`covid19.py` creates three dashborads to show the possible insights from the [this dataset](https://opendata.ecdc.europa.eu/covid19/nationalcasedeath_eueea_daily_ei/json/), which is almost daily updated and includes covid 19 daily cases and deaths.
+`covid19.py` creates three dashborads to show the possible insights from the [this dataset](https://opendata.ecdc.europa.eu/covid19/nationalcasedeath_eueea_daily_ei/json/), which is almost daily updated and includes covid19 daily cases and deaths.
 
 
 The dashboard framework used here is `streamlit` in combination with `folium` to create an interactive map. The dataset is connected with the map with the this [geojson file](https://raw.githubusercontent.com/leakyMirror/map-of-europe/master/GeoJSON/europe.geojson), on the key **properties.ISO2**.
