@@ -1,11 +1,3 @@
+def test_it_works():
+  pass
 
-
-print('hi')
-
-#def main():
-#    assert ... is
-
-
-
-#if __name__ == '__main__':
-#    main()
